@@ -3,13 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
-    <!-- Link to the external CSS file -->
     <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .modal-content p {
+            font-size: 16px;
+            color: #666;
+            margin: 20px 0;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover {
+            color: #000;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-card">
             <h2>Sign In</h2>
+            
+            {{if .Error}}
+            <div class="error-message">
+                {{.Error}}
+            </div>
+            {{end}}
+            
             <form method="POST" action="/login">
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -26,5 +81,37 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal for Access Restricted -->
+    {{if .AccessRestricted}}
+    <div id="accessRestrictedModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h1>Access Restricted</h1>
+            <p>
+                It seems you’ve reached the SSO portal directly.  
+                To log in, please start from one of the registered applications linked to this system.
+            </p>
+            <p class="contact">
+                Need help? Contact <a href="mailto:support.sso@bhaskaraa45.me">support.sso@bhaskaraa45.me</a>.
+            </p>
+        </div>
+    </div>
+    {{end}}
+
+    <script>
+        // Function to close the modal
+        function closeModal() {
+            document.getElementById("accessRestrictedModal").style.display = "none";
+        }
+
+        // Show the modal if AccessRestricted is set
+        window.onload = function () {
+            const modal = document.getElementById("accessRestrictedModal");
+            if (modal) {
+                modal.style.display = "block";
+            }
+        };
+    </script>
 </body>
 </html>

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sso/internal/controllers"
 	"sso/internal/database"
+	"sso/internal/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -28,14 +29,14 @@ func (s *Server) RegisterRoutes() {
 
 	s.LoadHTMLGlob("templates/*")
 
-	s.GET("/", s.HelloWorldHandler)
+	s.GET("/", utils.AuthRequired(), s.HomePage)
 	s.GET("/health", s.healthHandler)
 	s.POST("/login", controllers.LoginPostController)
 	s.GET("/login", controllers.LoginGetController)
 
 }
 
-func (s *Server) HelloWorldHandler(c *gin.Context) {
+func (s *Server) HomePage(c *gin.Context) {
 	resp := make(map[string]string)
 	resp["message"] = "Hello World"
 
