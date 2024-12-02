@@ -2,25 +2,37 @@ package server
 
 import (
 	"net/http"
+	"sso/internal/controllers"
+	"sso/internal/database"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 )
 
 func (s *Server) RegisterRoutes() {
-	// r := gin.Default()
+
+	store := cookie.NewStore([]byte("super-secret-key-aa45"))
+	s.Use(sessions.Sessions("session", store))
 
 	s.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // Add your frontend URL
+		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
-		AllowCredentials: true, // Enable cookies/auth
+		AllowCredentials: true,
 	}))
+
+	s.Static("/static", "static")
+
+	s.LoadHTMLGlob("templates/*")
 
 	s.GET("/", s.HelloWorldHandler)
 	s.GET("/health", s.healthHandler)
+	s.POST("/login", controllers.LoginPostController)
+	s.GET("/login", controllers.LoginGetController)
 
-	// return r
 }
 
 func (s *Server) HelloWorldHandler(c *gin.Context) {
@@ -31,5 +43,5 @@ func (s *Server) HelloWorldHandler(c *gin.Context) {
 }
 
 func (s *Server) healthHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, s.db.Health())
+	c.JSON(http.StatusOK, database.Health())
 }

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"os"
 	"strconv"
 
@@ -12,7 +13,7 @@ import (
 
 type Server struct {
 	port int
-	db   database.Service
+	db   *sql.DB
 	*gin.Engine
 }
 
@@ -21,7 +22,7 @@ func NewServer() *Server {
 
 	server := &Server{
 		port:   port,
-		db:     database.New(),
+		db:     database.InitializeDB(),
 		Engine: gin.Default(),
 	}
 
