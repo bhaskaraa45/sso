@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sso/internal/database"
+	"sso/internal/utils"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -73,10 +74,37 @@ func LoginPostController(c *gin.Context) {
 
 	if clientID == "" {
 		c.HTML(http.StatusUnauthorized, "login.html", gin.H{
-			"Error": "Client ID is missing.",
-			"DeveloperMessage": "If you are a developer, please ensure to pass the `client_id` as a query parameter in the login URL. \n\nFor example: \nhttps://sso.bhaskaraa45.me/login?client_id=your_client_id",
+			"Error":            "Missing Client ID.",
+			"DeveloperMessage": "Developers: Please include the query parameter client_id in the login URL. Example: https://sso.bhaskaraa45.me/login?client_id=your_client_id",
 		})
 		return
-	}	
+	}
+
+
+
+	res := utils.SSOValidator(clientID, redirectURI, ctx)
+
+	if res == 0 {
+		c.HTML(http.StatusUnauthorized, "login.html", gin.H{
+			"Error":            "Invalid Client ID.",
+			"DeveloperMessage": "Developers: The client_id provided in the query parameter is not valid. Verify the client_id or check your client configuration.",
+		})
+		return
+	}
+
+	if res == 1 {
+		c.HTML(http.StatusUnauthorized, "login.html", gin.H{
+			"Error":            "Unregistered Redirect URI.",
+			"DeveloperMessage": "Developers: The redirect_uri provided in the query parameter is not registered for this client ID. Please ensure the URI is added to the client configuration.",
+		})
+		return
+	}
+
+	if res != 2 {
+		c.HTML(http.StatusUnauthorized, "login.html", gin.H{
+			"Error": "Unexpected Error",
+		})
+		return
+	}
 
 }

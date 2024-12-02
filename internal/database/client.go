@@ -4,31 +4,42 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"sso/internal/models"
-	"strings"
+
+	"github.com/lib/pq"
 )
 
 func GetClient(ctx context.Context, clientID string) (models.Client, error) {
 	var client models.Client
-	var redirectURIs string
 	client.ClientID = clientID
+	var redirectURIs []string
 
-	query := `SELECT id, email, name, allowed_redirect_uris FROM clients WHERE id = $1`
-	err := db.QueryRowContext(ctx, query, clientID).Scan(&client.ID, &client.Email, &client.Name, &redirectURIs)
+	tx, err := db.Begin()
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return client, errors.New("client not found")
-		}
 		return client, err
 	}
 
-	client.AllowedRedirectURIs = parseRedirectURIs(redirectURIs)
-	return client, nil
-}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
 
-func parseRedirectURIs(redirectURIs string) []string {
-	if redirectURIs == "" {
-		return []string{}
+	query := `SELECT id, email, name, redirected_uris FROM clients WHERE client_id = $1`
+	err = tx.QueryRow(query, clientID).Scan(&client.ID, &client.Email, &client.Name, pq.Array(&redirectURIs))
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return client, fmt.Errorf("client not found for client_id: %s", clientID)
+		}
+		return client, fmt.Errorf("error fetching client: %w", err)
 	}
-	return strings.Split(redirectURIs, ",")
+
+	client.AllowedRedirectURIs = redirectURIs
+	return client, nil
 }
