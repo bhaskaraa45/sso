@@ -6,11 +6,11 @@ VALUES
     ('Alice Johnson', 'alice.johnson@example.com', '$2a$10$sullllz5Ir2UgpgHsMsEHu91nXhgkK13O2Fx89GVamnjVbz9wyI9q', FALSE); --- password = password123
 
 -- 2. Insert dummy clients
-INSERT INTO clients (name, email, password_hash, client_id)
+INSERT INTO clients (name, email, password_hash, client_id, redirected_uris)
 VALUES
-    ('AwesomeApp', 'contact@awesomeapp.com', '$2a$10$sullllz5Ir2UgpgHsMsEHu91nXhgkK13O2Fx89GVamnjVbz9wyI9q', 'client_abcdef123456'), --- password = password123
-    ('SuperService', 'support@superservice.com', '$2a$10$sullllz5Ir2UgpgHsMsEHu91nXhgkK13O2Fx89GVamnjVbz9wyI9q', 'client_ghijkl789012'), --- password = password123
-    ('CoolTool', 'admin@cooltool.com', '$2a$10$sullllz5Ir2UgpgHsMsEHu91nXhgkK13O2Fx89GVamnjVbz9wyI9q', 'client_mnopqr345678'); --- password = password123
+    ('AwesomeApp', 'contact@awesomeapp.com', '$2a$10$sullllz5Ir2UgpgHsMsEHu91nXhgkK13O2Fx89GVamnjVbz9wyI9q', 'client_abcdef123456', ARRAY['http://localhost:8080/', 'https://awesomeapp.com/redirect']),
+    ('SuperService', 'support@superservice.com', '$2a$10$sullllz5Ir2UgpgHsMsEHu91nXhgkK13O2Fx89GVamnjVbz9wyI9q', 'client_ghijkl789012', ARRAY['http://localhost:8080/auth', 'https://superservice.com/login']),
+    ('CoolTool', 'admin@cooltool.com', '$2a$10$sullllz5Ir2UgpgHsMsEHu91nXhgkK13O2Fx89GVamnjVbz9wyI9q', 'client_mnopqr345678', ARRAY['https://cooltool.com/oauth/callback']);
 
 -- 3. Insert dummy user-client relationships
 INSERT INTO user_clients (user_id, client_id)

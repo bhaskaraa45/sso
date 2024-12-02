@@ -56,11 +56,27 @@ func LoginPostController(c *gin.Context) {
 		return
 	}
 
-	if user.IsAdmin {
-		c.Redirect(http.StatusSeeOther, "/")
-	} else {
-		c.HTML(http.StatusOK, "login.html", gin.H{
-			"AccessRestricted": true,
-		})
+	redirectURI := c.Query("redirect_uri")
+
+	if redirectURI == "" {
+		if user.IsAdmin {
+			c.Redirect(http.StatusSeeOther, "/")
+		} else {
+			c.HTML(http.StatusOK, "login.html", gin.H{
+				"AccessRestricted": true,
+			})
+		}
+		return
 	}
+
+	clientID := c.Query("client_id")
+
+	if clientID == "" {
+		c.HTML(http.StatusUnauthorized, "login.html", gin.H{
+			"Error": "Client ID is missing.",
+			"DeveloperMessage": "If you are a developer, please ensure to pass the `client_id` as a query parameter in the login URL. \n\nFor example: \nhttps://sso.bhaskaraa45.me/login?client_id=your_client_id",
+		})
+		return
+	}	
+
 }

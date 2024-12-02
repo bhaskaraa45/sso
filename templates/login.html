@@ -52,6 +52,31 @@
         .close-button:hover {
             color: #000;
         }
+
+        .error-message {
+            background-color: #ffdddd;
+            color: #d8000c;
+            padding: 10px;
+            border: 1px solid #d8000c;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .developer-message {
+            background-color: #e8f4ff;
+            color: #3178c6;
+            padding: 10px;
+            border: 1px solid #3178c6;
+            border-radius: 4px;
+            margin-top: 15px;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -64,8 +89,14 @@
                 {{.Error}}
             </div>
             {{end}}
+
+            {{if .DeveloperMessage}}
+            <div class="developer-message">
+                {{.DeveloperMessage}}
+            </div>
+            {{end}}
             
-            <form method="POST" action="/login">
+            <form id="loginForm" method="POST" action="/login">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" required placeholder="Enter your email">
@@ -112,6 +143,15 @@
                 modal.style.display = "block";
             }
         };
+
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryString = urlParams.toString();
+
+            if (queryString) {
+                this.action += `?${queryString}`;
+            }
+        });
     </script>
 </body>
 </html>
