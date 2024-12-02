@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sso/internal/database"
 	"sso/internal/utils"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -80,8 +81,6 @@ func LoginPostController(c *gin.Context) {
 		return
 	}
 
-
-
 	res := utils.SSOValidator(clientID, redirectURI, ctx)
 
 	if res == 0 {
@@ -106,5 +105,23 @@ func LoginPostController(c *gin.Context) {
 		})
 		return
 	}
+
+	token, err := utils.GenerateToken(
+		"https://sso.bhaskaraa45.me",      // Issuer
+		clientID,                          // Audience
+		clientID,                          // Client ID
+		strings.Split(user.Email, "@")[1], //Hosted Domain
+		user,
+	)
+
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "login.html", gin.H{
+			"Error": "Failed to generate token. Please try again later.",
+		})
+		return
+	}
+
+	redirectURL := fmt.Sprintf("%s?token=%s", redirectURI, token)
+	c.Redirect(http.StatusFound, redirectURL)
 
 }
